@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  # nombre del servicio
+  mariadb: 
+    # imagen a utilizar
+    image: mariadb:10.6.14
+    # nombre del contenedor
+    container_name: mariadb
+
+    # variables de entorno
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: mypassword
+      MYSQL_DATABASE: test
+
+    # mapeo de puertos
+    ports:
+      - 3306:3306
+    volumes:
+      - ./app/mariadb:/var/lib/mysql
+
+
+  #nombre del servicio
+  mongodb:
+
+  #imagen
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    
+  #variables de entorno
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME= root
+    - MONGO_INITDB_ROOT_PASSWORD= mypassword
+
+    volumes:
+    - ./app/mongodbdata:/data/db
+
+
+
+#nombre del servicio
+  servidor:
+  #nombre del contenedor
+    container_name: app
+
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+
+    # variables de entorno
+    environment:
+      PORT: 3000
+      DATABASE_USER: root
+      DATABASE_PASSWORD: mypassword
+      DATABASE_NAME: test
+
+    # si falla, intenta reiniciarse
+    restart: always
+    # dependencias del contenedor
+    depends_on:
+      - mariadb
+      - mongodb
+    # mapeo de puertos
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app:/server
+
